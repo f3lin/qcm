@@ -40,7 +40,7 @@ RUN echo 'eval "$(oh-my-posh --init --shell bash --config /root/dev-remote.omp.y
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY requirements.txt /app/
+COPY requirements.txt /app/requirements.txt
 
 # Install FastAPI dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
