@@ -9,7 +9,7 @@
 FROM ubuntu:22.04
 
 # Installs fnm (Fast Node Manager)
-RUN bash -c "$(curl -fsSL https://deb.nodesource.com/setup_20.13.1)"
+RUN bash -c "$(curl -fsSL https://deb.nodesource.com/setup_20.x)"
 
 # Set environment variables
 ENV DEBIAN_FRONTEND noninteractive
