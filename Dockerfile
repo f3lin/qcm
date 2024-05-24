@@ -48,8 +48,17 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Install Angular CLI
 RUN npm install -g @angular/cli
 
+# Copy the requirements file into the container
+COPY init.sh /app/init.sh
+
+# Make the init script executable
+RUN chmod +x /app/init.sh
+
 # Init script to install the correct font and check installed frameworks versions
-RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/f3lin/qcm/main/init.sh)"
+RUN /app/init.sh
+
+# # Init script to install the correct font and check installed frameworks versions
+# RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/f3lin/qcm/main/init.sh)"
 
 # Set the entry point and default command to start FastAPI
 WORKDIR /app
