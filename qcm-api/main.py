@@ -81,11 +81,11 @@ app = FastAPI(
                 ]
             )
 
-# Function to get all items
+# Function to get all qcm questions
 def get_qcm():
     return qcm
 
-# Function to get an item by its ID
+# Function to get an qcm questions by its ID
 def get_qcm_question_by_id(question_id: int):
     for question in qcm:
         if question.id == question_id:
