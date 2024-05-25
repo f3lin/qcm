@@ -58,6 +58,10 @@ async def lifespan(app: FastAPI):
         question_data.update(row)
         qcm.append(Question(**question_data))
     
+    for q in qcm:
+        if q.subject == "Sytèmes distribués":
+            q.subject = "Systèmes distribués"
+    
     yield
 
     # Clean up the CSV questions and release the resources
