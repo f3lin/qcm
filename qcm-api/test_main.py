@@ -5,7 +5,6 @@ from typing import List
 
 from main import app, Question
 
-
 @pytest.mark.asyncio
 async def test_read_qcm():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
