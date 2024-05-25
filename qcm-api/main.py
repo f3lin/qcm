@@ -66,21 +66,22 @@ async def lifespan(app: FastAPI):
     qcm.clear()
 
 app = FastAPI(
-    lifespan=lifespan,
-    openapi_tags=[
-    {
-        'name': 'Questions',
-        'description': 'default functions that are used to deal with QCM'
-    },
-    {
-        'name': 'Uses',
-        'description': 'functions that are used to deal with Uses'
-    },
-    {
-        'name': 'Subjects',
-        'description': 'functions that are used to deal with Subjects'
-    }
-])
+                lifespan=lifespan,
+                openapi_tags=[
+                    {
+                        'name': 'Questions',
+                        'description': 'default functions that are used to deal with QCM'
+                    },
+                    {
+                        'name': 'Uses',
+                        'description': 'functions that are used to deal with Uses'
+                    },
+                    {
+                        'name': 'Subjects',
+                        'description': 'functions that are used to deal with Subjects'
+                    }
+                ]
+            )
 
 # Function to get all items
 def get_qcm():
