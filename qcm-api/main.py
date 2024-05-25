@@ -7,8 +7,6 @@ from io import StringIO
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 
-from pydantic import BaseModel
-
 class Question(BaseModel):
     id: int
     question: str
