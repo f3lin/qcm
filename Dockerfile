@@ -2,11 +2,11 @@
 #   - Ubuntu 22.04
 #   - Python 3
 #   - Pip 3
-#   - NodeJs 20.13.1
-#   - Angular Cli
 #   - Oh-My-Posh
+#   - NodeJs 20.13.1 and Angular Cli via .devcontainer file
+###############################################
 
-FROM sitespeedio/node:ubuntu-22-04-nodejs-20.11.1
+FROM ubuntu:22.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND noninteractive
@@ -16,8 +16,6 @@ RUN apt-get update && \
     apt-get install -y \
     python3 \
     python3-pip \
-    nodejs \
-    npm \
     curl \
     git \
     unzip \
@@ -37,13 +35,10 @@ RUN echo 'eval "$(oh-my-posh --init --shell bash --config /root/dev-remote.omp.y
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY requirements.txt /app/requirements.txt
+COPY requirements.txt /app/
 
 # Install FastAPI dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
-
-# Install Angular CLI
-RUN npm install -g @angular/cli
 
 # Set the entry point and default command to start FastAPI
 WORKDIR /app
