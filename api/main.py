@@ -2,7 +2,7 @@ import os.path
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from csv_management import load_csv
-from controller import auth
+from controller import auth, question
 
 csv_url = "https://dst-de.s3.eu-west-3.amazonaws.com/fastapi_fr/questions.csv"
 path = 'data/data.csv'
@@ -63,6 +63,7 @@ async def health_check():
         raise HTTPException(status_code=503, detail="Service Unavailable")
 
 app.include_router(auth.router, prefix=f"{prefix}/auth")
+app.include_router(question.router, prefix=f"{prefix}/questions")
 
 if __name__ == "__main__":
     import uvicorn
