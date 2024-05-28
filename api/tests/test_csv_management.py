@@ -5,9 +5,9 @@ from csv_management import (
     convert_CSVQuestion_List_to_dict_list,
     convert_df_to_CSVQuestion_List, 
     get_questions, load_csv, 
-    verify_data_existance, 
-    verify_subject_existance,
-    verify_use_existance
+    verify_question_subject_and_subject_existence, 
+    verify_subject_existence,
+    verify_use_existence
 )
 
 from models import CSVQuestion
@@ -50,7 +50,7 @@ def test_load_csv(tmp_path, sample_df):
     loaded_data = pd.read_csv(tmp_path / "loaded_test.csv").fillna('')    
     assert loaded_data.equals(sample_df.fillna(''))
 
-def test_verify_data_existance(sample_df):
+def test_verify_data_existence(sample_df):
     # Create a CSVQuestion object for testing
     question = CSVQuestion(
         question='Question 1',
@@ -65,7 +65,7 @@ def test_verify_data_existance(sample_df):
     )
     
     # Ensure the question exists in the DataFrame
-    assert verify_data_existance(question, sample_df) == True
+    assert verify_question_subject_and_subject_existence(question, sample_df) == True
     
     # Ensure a non-existent question returns False
     non_existent_question = CSVQuestion(
@@ -79,21 +79,21 @@ def test_verify_data_existance(sample_df):
         responseD='A4',
         remark=''
     )
-    assert verify_data_existance(non_existent_question, sample_df) == False
+    assert verify_question_subject_and_subject_existence(non_existent_question, sample_df) == False
 
-def test_verify_use_existance(sample_df):
+def test_verify_use_existence(sample_df):
     # Ensure existing 'use' returns True
-    assert verify_use_existance('Exam', sample_df) == True
+    assert verify_use_existence('Exam', sample_df) == True
     
     # Ensure non-existent 'use' returns False
-    assert verify_use_existance('Non-existent Use', sample_df) == False
+    assert verify_use_existence('Non-existent Use', sample_df) == False
 
-def test_verify_subject_existance(sample_df):
+def test_verify_subject_existence(sample_df):
     # Ensure existing subjects return True
-    assert verify_subject_existance(['Subject 1', 'Subject 2'], sample_df) == True
+    assert verify_subject_existence(['Subject 1', 'Subject 2'], sample_df) == True
     
     # Ensure non-existent subject returns False
-    assert verify_subject_existance(['Non-existent Subject'], sample_df) == False
+    assert verify_subject_existence(['Non-existent Subject'], sample_df) == False
 
 def test_convert_df_to_CSVQuestion_List(sample_df):
     # Convert DataFrame to a list of CSVQuestion objects
@@ -147,4 +147,4 @@ def test_add_question(tmp_path, sample_df):
     # Add the new question to the DataFrame and check if it's present
     add_question(new_question, sample_df, tmp_path / "updated_test.csv")
     updated_data = pd.read_csv(tmp_path / "updated_test.csv")
-    assert verify_data_existance(new_question, updated_data) == True
+    assert verify_question_subject_and_subject_existence(new_question, updated_data) == True
