@@ -1,107 +1,69 @@
-import csv
-import asyncio
-import httpx
-from typing import List
+import os.path
 from fastapi import FastAPI, HTTPException
-from io import StringIO
 from contextlib import asynccontextmanager
-from pydantic import BaseModel
+from csv_management import load_csv
+from controller import auth
 
-class Question(BaseModel):
-    id: int
-    question: str
-    subject: str
-    use: str
-    correct: str
-    responseA: str
-    responseB: str
-    responseC: str
-    responseD: str
-    remark: str
-
-
-# URL to your CSV file
 csv_url = "https://dst-de.s3.eu-west-3.amazonaws.com/fastapi_fr/questions.csv"
+path = 'data/data.csv'
 
-# Asynchronous function to fetch CSV from URL with retry
-async def fetch_csv_from_url_with_retry(url, max_attempts=3, retry_delay=1):
-    for attempt in range(max_attempts):
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url)
-                if response.status_code == 200:
-                    csv_questions = response.text
-                    csv_reader = csv.DictReader(StringIO(csv_questions))
-                    return list(csv_reader)
-                else:
-                    raise HTTPException(status_code=500, detail="Failed to fetch CSV from URL")
-        except Exception as e:
-            if attempt < max_attempts - 1:
-                print(f"Attempt {attempt + 1} failed. Retrying...")
-                await asyncio.sleep(retry_delay)
-            else:
-                raise HTTPException(status_code=500, detail="Failed to fetch CSV from URL after multiple attempts")
-
-# Initialize questions variable
-qcm: List[Question] = []
-
-# Have a look on https://fastapi.tiangolo.com/advanced/events/
-# Asynchronous startup event to fetch CSV questions
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global qcm
-    csv_data  = await fetch_csv_from_url_with_retry(csv_url)
+    """
+    Asynchronous context manager to load CSV data into the application during startup.
 
-    # Add an "id" column to the CSV questions
-    for i, row in enumerate(csv_data ):
-        question_data = {'id': i}
-        question_data.update(row)
-        qcm.append(Question(**question_data))
-    
-    for q in qcm:
-        if q.subject == "Sytèmes distribués":
-            q.subject = "Systèmes distribués"
-    
+    Parameters:
+    - app (FastAPI): The FastAPI application instance.
+
+    Yields:
+    - None
+
+    Usage:
+    async with lifespan(app):
+        # Load CSV data into the application
+    """
+    load_csv(csv_url, path)
+    load_csv(csv_url, f"tests/{path}")
     yield
-
-    # Clean up the CSV questions and release the resources
-    qcm.clear()
 
 app = FastAPI(
                 lifespan=lifespan,
                 openapi_tags=[
                     {
                         'name': 'Questions',
-                        'description': 'default functions that are used to deal with QCM'
+                        'description': 'Operations related to questions in the QCM'
                     },
                     {
-                        'name': 'Uses',
-                        'description': 'functions that are used to deal with Uses'
+                        'name': 'Health',
+                        'description': 'health check operations'
                     },
                     {
-                        'name': 'Subjects',
-                        'description': 'functions that are used to deal with Subjects'
+                        'name': 'Authentication',
+                        'description': 'Authentication and health check operations'
                     }
                 ]
             )
 
-# Function to get all qcm questions
-def get_qcm():
-    return qcm
+prefix = "/api-v1"
 
-# Function to get an qcm questions by its ID
-def get_qcm_question_by_id(question_id: int):
-    for question in qcm:
-        if question.id == question_id:
-            return question
-    raise HTTPException(status_code=404, detail="Question not found")
+@app.get(f"{prefix}/healthcheck/", tags=["Health"], summary="Health Check Endpoint", description="Check the health status of the API.")
+async def health_check():
+    """
+    Check the health status of the API.
 
-# Endpoint to get all qcm questions
-@app.get("/qcm/", response_model=List[Question], tags=['Questions'], summary="Retrieve all questions", description="Get a list of all questions in the QCM.")
-async def read_qcm():
-    return get_qcm()
+    Returns:
+    - dict: A dictionary indicating the status of the API. If the data file exists, returns {"status": "ok"}; otherwise, raises a 503 error.
 
-# Endpoint to get an qcm question by its ID
-@app.get("/qcm/{question_id}", response_model=Question, tags=['Questions'], summary="Retrieve a question by ID", description="Get the details of a specific question by its ID.")
-async def read_qcm_question_by_id(question_id: int):
-    return get_qcm_question_by_id(question_id)
+    Raises:
+    - HTTPException: If the data file is not available, raises a 503 error with the message "Service Unavailable".
+    """
+    if os.path.isfile(path):
+        return {"status": "ok"}
+    else:
+        raise HTTPException(status_code=503, detail="Service Unavailable")
+
+app.include_router(auth.router, prefix=f"{prefix}/auth")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
